@@ -11,6 +11,7 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
+import androidx.core.content.getSystemService
 
 class MainActivity : AppCompatActivity() {
 
@@ -27,8 +28,8 @@ class MainActivity : AppCompatActivity() {
             return
         }
 
-        val bluetoothManager = getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
-        bluetoothAdapter = bluetoothManager.adapter ?: null
+        val bluetoothManager = getSystemService<BluetoothManager>()
+        bluetoothAdapter = bluetoothManager?.adapter
         bluetoothAdapter?.let {
             Log.e("hogehoge", "Bluetooth is not supported")
             return
@@ -36,10 +37,13 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun requestPermission() {
-        requestPermissions(
-            PERMISSIONS.filter { checkSelfPermission(it) != PackageManager.PERMISSION_GRANTED }.toTypedArray(),
-            REQUEST_PERMISSION
-        )
+        PERMISSIONS.filter { checkSelfPermission(it) != PackageManager.PERMISSION_GRANTED }
+            .toTypedArray()
+            .let {
+                if (it.isNotEmpty()) {
+                    requestPermissions(it, REQUEST_PERMISSION)
+                }
+            }
     }
 
     override fun onResume() {
